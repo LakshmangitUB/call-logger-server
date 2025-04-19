@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "call-logger-app-457216",
+  "private_key_id": "89bc315989eda42857b007251b7bf678d7302eb8",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCy/B50W70MD5BP\nYngM/tUp3XBtfUs6DB4yllcWT6OfWInQdZ3hHiUQ6nuC1oGDYoL7AgYLRoSbjCZy\nP2Ea9jCzcBbd1Jqmqw1QjKDtzqX1+zhBbME1opewjkSY15pdWf/TA4g2XtAbDapz\nWOmA8AVBtMQwqxIAN27UUjg9YG7ByNmB7IWVe7wp0MWIhKmv8r7FUaiAxQYg6vSO\nBose0GOh932b+gEp59tLzaI0ka7MOTP/Bux6o7Mbcs6r63y7lCAviFnCSTm13Je5\nxv3tyJgHwps/10yXTKlnq0v1wjBK+6tpE9lLPzvtH7fCoj2D2hfXTqB8FoE6OlSO\nqKlDOTS3AgMBAAECggEABOXsaW/HRSi54MpHkcd5iutB8+UdZWnGe8jsejJUvnwc\nTWWim/IIvqVEGwkGw1MzVW4xPya/Y0hbFv5QCH5bR9XV8l0qnEwLEby/fLKOjSRC\nXlv9D5wy/YRvMSWZVlurqhkrJZ3DoTHnC8APp9Upt6ocQl60H+hkcpALdPaKIWhz\ndzZrrbDE4x8v/z+g6zQT1zEuSmcyW8HJlsVBXrUOeuvGQH6C/hFeq/lID4ej7sTz\nov53riDiJqYJ+tCvKZmYafPV493/6qf5Ybth0Kc5kxVKq+xQtdyyw6xpbnpcSGDd\ntJRf8HVh6lAGu7uY59HHikK+vfgyLNNlbRHLIMaGWQKBgQDnKQB8T94NPqxcnhad\nyeFlmIKSpCOOcfS8shxF+EdP+92l+uUNjE7aV23/+rtB/viW3CcVOiNXEfL9hr0b\nmNdaZNfvGLeFDeRO9gk3uOVfV6JFKDXf/Gn5cIj0TP2ueIWfxzjBHRY3MizKpR0I\nGNfxvgNzVtwqtMIpvQImJRtmrwKBgQDGN9K3QNd7Hs13MtnuqVVbRxHRVfWlOS6x\nZFK76eHneYfMB3VfcUwa9IXh6fJ6cjPH5NcJn+mWsp3GCFMjN+WqPI7lUQQkCmcv\nnQWQiD2c/RS8+bqZL2rFCZfxeY0WcwUOfqjZHTMrvb2bbrDd3D6MAfyZT1gmRd6d\n8Re/DsAUeQKBgQCquqnVJtgGSEfdkBV8LOMAuoeV7w0j5B6yT4p6U0m4VXn7YTdT\nrlF/ChwAeBtePwczxR5Im0wGvwcNITsC6vwDk3+45DSHXR9HAokEUtd2d68uDOjd\nqfxLc0ZzyXmEJxfqTqYoW2dRFQnoEdNDa7XyojjCM2EhWageU68GpVl7mQKBgEMM\n9RmKNJnwVH6C1BeYbkg/JTbTxhGK41GcZyQrvIAJqzcIOtr7P0xK9NLzyVNEOGHg\n9iDKWEDi0N4BSOY77VOFwqytmCH85uTDT/ORMo5dSduW+lkBIjPex+gmPuSeKdK6\nY7F14C5ms7HVYrzZ2MqRjXnqzh28Os7glDDL84u5AoGAXSs8rUzUrJTvFV3QQ8rV\nlHhEEFocG8agXn9rzgnY6mhh03bor5DYu997q5YZJ1AnDPGiq59FxaVo99JK1RBT\nigUe1nlv1hw6/GMCLCYhqwPoKUca9UDxzC/rNQ4sF0WcS+H4QJJo86qehqagtZV2\nHTo/hwQdK6CJI/LpNFhHHCA=\n-----END PRIVATE KEY-----\n",
+  "client_email": "call-logger-bot@call-logger-app-457216.iam.gserviceaccount.com",
+  "client_id": "103807170017847586207",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/call-logger-bot%40call-logger-app-457216.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
