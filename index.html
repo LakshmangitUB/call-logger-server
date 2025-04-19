@@ -114,8 +114,144 @@
     Powered by Voice Tech &copy; 2025
   </footer>
   <script>
-    // Add your JavaScript logic here (unchanged from earlier updates)
-    // This includes the speech recognition and interview handling.
-  </script>
-</body>
-</html>
+    let recognition;
+    let currentQuestionIndex = 0;
+    const questions = [
+      "Is this a new or existing client?",
+      "What is the caller's name?",
+      "What is the phone number?",
+      "What is the pet's name?",
+      "How old is the pet?",
+      "What service is requested?",
+      "What is the specific reason for the call?",
+      "What is the preferred appointment time?",
+      "Which doctor is requested?",
+      "Who handled this call?",
+      "Is a follow-up needed?",
+      "Any remarks?",
+      "What is the pet's type or breed?",
+      "Where did the caller hear about us?",
+      "Is the appointment confirmed?",
+      "What is the urgency level?",
+      "Is a callback scheduled?",
+      "Any additional instructions?"
+    ];
+    let answers = [];
+    let isRecognitionRunning = false;
+    let isInterviewRunning = false;
+    let currentAnswer = "";
+    let isNewClient = null; // Determine new/existing client
+
+    const initBtn = document.getElementById("initBtn");
+    const startBtn = document.getElementById("startBtn");
+    const stopBtn = document.getElementById("stopBtn");
+    const micStatus = document.getElementById("micStatus");
+    const recogStatus = document.getElementById("recogStatus");
+    const logDiv = document.getElementById("log");
+
+    // Log messages
+    function logMessage(msg, className = "status") {
+      const div = document.createElement("div");
+      div.className = className;
+      div.textContent = msg;
+      logDiv.appendChild(div);
+      logDiv.scrollTop = logDiv.scrollHeight;
+    }
+
+    function logError(msg) {
+      logMessage(msg, "error");
+    }
+
+    // Speak function
+    function speakText(text, callback) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'en-US';
+      utterance.onend = callback;
+      window.speechSynthesis.speak(utterance);
+    }
+
+    // Initialize system
+    initBtn.addEventListener("click", async () => {
+      try {
+        logMessage("Initializing system...");
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        stream.getTracks().forEach(track => track.stop());
+        micStatus.textContent = "Microphone: Access granted";
+        micStatus.style.color = "#0f9d58";
+
+        recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.lang = "en-US";
+
+        recognition.onstart = () => {
+          recogStatus.textContent = "Speech Recognition: Active";
+          isRecognitionRunning = true;
+        };
+
+        recognition.onend = () => {
+          recogStatus.textContent = "Speech Recognition: Ready";
+          isRecognitionRunning = false;
+          
+          if (isInterviewRunning && currentAnswer) {
+            if (currentQuestionIndex === 0) {
+              // New/Existing client logic
+              if (currentAnswer.toLowerCase().includes("new")) {
+                isNewClient = true;
+                logMessage("New client detected. Continuing interview.", "status");
+                askNextQuestion();
+              } else {
+                isNewClient = false;
+                logMessage("Existing client detected. No log will be created.", "status");
+                isInterviewRunning = false;
+                speakText("Thank you! No log will be created.");
+                startBtn.disabled = false;
+                stopBtn.disabled = true;
+              }
+            } else {
+              logMessage(`Answer: ${currentAnswer}`, "answer");
+              answers.push(currentAnswer); // Store the answer
+              currentAnswer = "";
+              askNextQuestion();
+            }
+          }
+        };
+
+        recognition.onresult = (e) => {
+          currentAnswer = e.results[0][0].transcript.trim().toLowerCase();
+          
+          if (currentAnswer.includes("skip")) {
+            logMessage("Question skipped by client.", "status");
+            clearTimeout(timeout); // Cancel the timeout
+            recognition.stop();
+            currentQuestionIndex++;
+            askNextQuestion();
+          } else {
+            recognition.stop();
+          }
+        };
+
+        recognition.onerror = (e) => {
+          logError(`Recognition error: ${e.error}`);
+          isRecognitionRunning = false;
+          if (e.error === 'no-speech') {
+            logMessage("No speech detected. Please try again.");
+            recognition.start();
+          }
+        };
+
+        recogStatus.textContent = "Speech Recognition: Ready";
+        recogStatus.style.color = "#0f9d58";
+        startBtn.disabled = false;
+        initBtn.disabled = true;
+        logMessage("System ready. Click 'Start Interview' to begin.");
+      } catch (err) {
+        logError(`Initialization failed: ${err.message}`);
+        micStatus.textContent = "Microphone: Access denied";
+        micStatus.style.color = "#db4437";
+      }
+    });
+
+    // Start the interview
+    startBtn.addEventListener("click", () => {
+      if (!is
