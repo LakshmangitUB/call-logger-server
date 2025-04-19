@@ -3,120 +3,50 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Interactive Voice Interview</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta2/css/all.min.css" />
+  <title>Voice Interview App</title>
   <style>
     body {
       font-family: Arial, sans-serif;
       margin: 0;
-      padding: 0;
-      background: #f4f4f9;
-      color: #333;
-    }
-    header {
-      background: #4285f4;
-      color: white;
-      padding: 15px;
-      text-align: center;
-      font-size: 1.5em;
-      font-weight: bold;
-    }
-    footer {
-      text-align: center;
-      padding: 10px;
-      background: #333;
-      color: white;
-      font-size: 0.9em;
-      position: fixed;
-      bottom: 0;
-      width: 100%;
-    }
-    .container {
-      max-width: 900px;
-      margin: 20px auto;
       padding: 20px;
-      background: white;
-      border-radius: 8px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      background: #f4f4f4;
     }
-    button {
-      padding: 12px 24px;
-      margin: 10px 5px;
-      background: #4285f4;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 1em;
-    }
-    button:disabled {
-      background: #9e9e9e;
-      cursor: not-allowed;
-    }
-    button:hover {
-      background: #3367d6;
-    }
-    #statusPanel {
-      background: #e3f2fd;
-      padding: 15px;
-      border-radius: 5px;
-      margin-bottom: 20px;
-      box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.1);
+    h1 {
+      text-align: center;
     }
     #log {
-      border: 1px solid #ddd;
-      padding: 15px;
-      border-radius: 5px;
-      background: #fafafa;
-      min-height: 300px;
+      max-width: 600px;
+      margin: 20px auto;
+      padding: 10px;
+      background: #fff;
+      border-radius: 8px;
       overflow-y: auto;
+      height: 300px;
+      border: 1px solid #ccc;
     }
-    .status {
-      color: #0d47a1;
-      margin: 5px 0;
-      font-weight: bold;
-    }
-    .error {
-      color: #e53935;
-      font-weight: bold;
-    }
-    .question {
-      color: #0f9d58;
-      font-weight: bold;
-    }
-    .answer {
-      color: #4285f4;
-      margin-left: 20px;
-    }
-    .fa-microphone {
-      color: #0f9d58;
-    }
-    .fa-stop {
-      color: #e53935;
+    .question { color: #2b7bba; }
+    .answer { color: #388e3c; }
+    .status { color: #555; }
+    .error { color: red; }
+    button {
+      margin: 5px;
+      padding: 10px 20px;
+      font-size: 16px;
     }
   </style>
 </head>
 <body>
-  <header>Welcome to the Voice Interview App!</header>
-  <div class="container">
-    <div id="statusPanel">
-      <p><i class="fas fa-microphone"></i> Microphone: <span id="micStatus">Not accessed</span></p>
-      <p><i class="fas fa-comments"></i> Speech Recognition: <span id="recogStatus">Not initialized</span></p>
-    </div>
-    <div style="text-align: center;">
-      <button id="initBtn"><i class="fas fa-cogs"></i> Initialize System</button>
-      <button id="startBtn" disabled><i class="fas fa-play"></i> Start Interview</button>
-      <button id="stopBtn" disabled><i class="fas fa-stop"></i> Stop Interview</button>
-    </div>
-    <div id="log"></div>
+  <h1>Voice Interview</h1>
+  <div style="text-align:center;">
+    <button id="initBtn">Initialize</button>
+    <button id="startBtn" disabled>Start Interview</button>
+    <button id="stopBtn" disabled>Stop</button>
   </div>
-  <footer>
-    Powered by Voice Tech &copy; 2025
-  </footer>
+  <div id="log"></div>
+
   <script>
     let recognition;
-    let currentQuestionIndex = 0;
-    const questions = [
+    let questions = [
       "Is this a new or existing client?",
       "What is the caller's name?",
       "What is the phone number?",
@@ -136,122 +66,141 @@
       "Is a callback scheduled?",
       "Any additional instructions?"
     ];
+
     let answers = [];
-    let isRecognitionRunning = false;
+    let currentQuestionIndex = 0;
     let isInterviewRunning = false;
     let currentAnswer = "";
-    let isNewClient = null; // Determine new/existing client
+    let timeout = null;
+    let isNewClient = null;
 
-    const initBtn = document.getElementById("initBtn");
-    const startBtn = document.getElementById("startBtn");
-    const stopBtn = document.getElementById("stopBtn");
-    const micStatus = document.getElementById("micStatus");
-    const recogStatus = document.getElementById("recogStatus");
     const logDiv = document.getElementById("log");
 
-    // Log messages
-    function logMessage(msg, className = "status") {
-      const div = document.createElement("div");
-      div.className = className;
-      div.textContent = msg;
-      logDiv.appendChild(div);
+    function logMessage(msg, cls = "status") {
+      const p = document.createElement("p");
+      p.className = cls;
+      p.textContent = msg;
+      logDiv.appendChild(p);
       logDiv.scrollTop = logDiv.scrollHeight;
     }
 
-    function logError(msg) {
-      logMessage(msg, "error");
-    }
-
-    // Speak function
-    function speakText(text, callback) {
+    function speak(text, callback) {
       const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'en-US';
+      utterance.lang = "en-US";
       utterance.onend = callback;
       window.speechSynthesis.speak(utterance);
     }
 
-    // Initialize system
-    initBtn.addEventListener("click", async () => {
-      try {
-        logMessage("Initializing system...");
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        stream.getTracks().forEach(track => track.stop());
-        micStatus.textContent = "Microphone: Access granted";
-        micStatus.style.color = "#0f9d58";
+    function askNextQuestion() {
+      if (currentQuestionIndex >= questions.length) {
+        logMessage("Interview complete.", "status");
+        speak("Thank you. Interview complete.", () => {});
+        submitAnswers();
+        document.getElementById("startBtn").disabled = false;
+        document.getElementById("stopBtn").disabled = true;
+        isInterviewRunning = false;
+        return;
+      }
 
+      const question = questions[currentQuestionIndex];
+      logMessage("Q: " + question, "question");
+      speak(question, () => {
+        recognition.start();
+        timeout = setTimeout(() => {
+          recognition.stop();
+          logMessage("No response, moving to next question.", "status");
+          answers.push("No response");
+          currentQuestionIndex++;
+          askNextQuestion();
+        }, 30000); // 30 sec
+      });
+    }
+
+    function submitAnswers() {
+      fetch("http://localhost:3000/logAnswers", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          answers: answers,
+          isNewClient: isNewClient
+        })
+      })
+      .then(res => res.text())
+      .then(data => logMessage("Server: " + data, "status"))
+      .catch(err => logMessage("Error: " + err.message, "error"));
+    }
+
+    document.getElementById("initBtn").onclick = () => {
+      navigator.mediaDevices.getUserMedia({ audio: true }).then(() => {
         recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+        recognition.lang = "en-US";
         recognition.continuous = false;
         recognition.interimResults = false;
-        recognition.lang = "en-US";
-
-        recognition.onstart = () => {
-          recogStatus.textContent = "Speech Recognition: Active";
-          isRecognitionRunning = true;
-        };
-
-        recognition.onend = () => {
-          recogStatus.textContent = "Speech Recognition: Ready";
-          isRecognitionRunning = false;
-          
-          if (isInterviewRunning && currentAnswer) {
-            if (currentQuestionIndex === 0) {
-              // New/Existing client logic
-              if (currentAnswer.toLowerCase().includes("new")) {
-                isNewClient = true;
-                logMessage("New client detected. Continuing interview.", "status");
-                askNextQuestion();
-              } else {
-                isNewClient = false;
-                logMessage("Existing client detected. No log will be created.", "status");
-                isInterviewRunning = false;
-                speakText("Thank you! No log will be created.");
-                startBtn.disabled = false;
-                stopBtn.disabled = true;
-              }
-            } else {
-              logMessage(`Answer: ${currentAnswer}`, "answer");
-              answers.push(currentAnswer); // Store the answer
-              currentAnswer = "";
-              askNextQuestion();
-            }
-          }
-        };
 
         recognition.onresult = (e) => {
-          currentAnswer = e.results[0][0].transcript.trim().toLowerCase();
-          
-          if (currentAnswer.includes("skip")) {
-            logMessage("Question skipped by client.", "status");
-            clearTimeout(timeout); // Cancel the timeout
-            recognition.stop();
+          const text = e.results[0][0].transcript.toLowerCase();
+          if (text.includes("skip")) {
+            logMessage("Skipped.", "status");
+            answers.push("Skipped");
             currentQuestionIndex++;
             askNextQuestion();
           } else {
+            currentAnswer = text;
             recognition.stop();
           }
         };
 
-        recognition.onerror = (e) => {
-          logError(`Recognition error: ${e.error}`);
-          isRecognitionRunning = false;
-          if (e.error === 'no-speech') {
-            logMessage("No speech detected. Please try again.");
-            recognition.start();
+        recognition.onend = () => {
+          clearTimeout(timeout);
+          if (!isInterviewRunning) return;
+
+          if (currentQuestionIndex === 0) {
+            if (currentAnswer.includes("new")) {
+              isNewClient = true;
+              logMessage("New client detected.", "status");
+              currentQuestionIndex++;
+              askNextQuestion();
+            } else {
+              isNewClient = false;
+              logMessage("Existing client. Interview skipped.", "status");
+              speak("Thank you. No log will be created.");
+              isInterviewRunning = false;
+              document.getElementById("startBtn").disabled = false;
+              document.getElementById("stopBtn").disabled = true;
+            }
+          } else {
+            logMessage("A: " + currentAnswer, "answer");
+            answers.push(currentAnswer || "No response");
+            currentQuestionIndex++;
+            askNextQuestion();
           }
+
+          currentAnswer = "";
         };
 
-        recogStatus.textContent = "Speech Recognition: Ready";
-        recogStatus.style.color = "#0f9d58";
-        startBtn.disabled = false;
-        initBtn.disabled = true;
-        logMessage("System ready. Click 'Start Interview' to begin.");
-      } catch (err) {
-        logError(`Initialization failed: ${err.message}`);
-        micStatus.textContent = "Microphone: Access denied";
-        micStatus.style.color = "#db4437";
-      }
-    });
+        recognition.onerror = (e) => logMessage("Recognition error: " + e.error, "error");
 
-    // Start the interview
-    startBtn.addEventListener("click", () => {
-      if (!is
+        document.getElementById("startBtn").disabled = false;
+        logMessage("System ready.");
+      }).catch(err => logMessage("Mic access denied: " + err.message, "error"));
+    };
+
+    document.getElementById("startBtn").onclick = () => {
+      answers = [];
+      currentQuestionIndex = 0;
+      isInterviewRunning = true;
+      document.getElementById("startBtn").disabled = true;
+      document.getElementById("stopBtn").disabled = false;
+      speak("Starting the interview.", askNextQuestion);
+    };
+
+    document.getElementById("stopBtn").onclick = () => {
+      recognition.stop();
+      isInterviewRunning = false;
+      logMessage("Interview stopped.", "status");
+      document.getElementById("startBtn").disabled = false;
+      document.getElementById("stopBtn").disabled = true;
+    };
+  </script>
+</body>
+</html>
