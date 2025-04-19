@@ -19,16 +19,26 @@ const auth = new google.auth.GoogleAuth({
 
 app.post("/logAnswers", async (req, res) => {
   try {
-    const answers = req.body.answers; // Get answers from the request body
+    const { answers, isNewClient } = req.body;
+
+    // Stop logging if the client is not new
+    if (!isNewClient) {
+      return res.status(200).send("No log created, as the client is existing.");
+    }
+
+    const currentDate = new Date();
+    const date = currentDate.toISOString().split("T")[0]; // YYYY-MM-DD format
+    const time = currentDate.toTimeString().split(" ")[0]; // HH:MM:SS format
+
     const sheets = google.sheets({ version: "v4", auth });
 
-    // Append answers to Google Sheets
+    // Append answers to Google Sheets with date and time
     await sheets.spreadsheets.values.append({
       spreadsheetId,
       range: "Sheet1", // Update this if your sheet name is different
       valueInputOption: "USER_ENTERED",
       requestBody: {
-        values: [answers], // Answers will be logged as a single row
+        values: [[date, time, ...answers]], // Date and Time are the first two columns
       },
     });
 
